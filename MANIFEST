@@ -1,0 +1,11 @@
+Build.PL
+Changes
+Makefile.PL
+MANIFEST
+META.yml
+README
+t/01-Module-ParseDeps.t
+t/data/1/Acme-CPAN-Distribution-Depends.meta
+t/data/2/META.yml
+t/data/3/Makefile.PL
+lib/Module/ParseDeps.pm
