@@ -1,5 +1,6 @@
 name: ACME-CPAN-Distribution-Depends
 version: 0.00
+version_from: ./lib/ACME/CPAN/Distribution/Depends.pm
 author: Robert Rothenberg <rrwo at cpan.org>
 abstract: This is a test meta file. Do not use.
 license: perl

@@ -1,5 +1,11 @@
 Revision history for Perl extension Module::ParseDeps.
 
+0.02  Mon Jul 19 12:05:00 2004
+	- added DEBUG hook
+	- hack to fix issue with 'version_from' tag in some distributions'
+          META.yml file
+	- eval { } YAML parsing in case of error (eg. Test-1.25.meta)
+
 0.01  Thu Jul 15 15:35:11 2004
 	- renamed to Module::ParseDeps
 	- original version; created by h2xs 1.23 with options

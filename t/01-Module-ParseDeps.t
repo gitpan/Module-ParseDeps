@@ -94,4 +94,3 @@ use_ok('Module::ParseDeps');
   ok( $ref->{'perl'} eq '5.6.1' );
   ok( $ref->{'Test::More'} == 6 );
 }
-

@@ -17,8 +17,9 @@ our @EXPORT = qw( parsedeps );
 our %EXPORT_TAGS = ( 'all' => [ @EXPORT ] );
 our @EXPORT_OK = ( @{ $EXPORT_TAGS{'all'} } );
 
+our $VERSION = '0.02';
 
-our $VERSION = '0.01';
+our $DEBUG   = 0;
 
 sub _parse_meta {
   my $file = shift;
@@ -38,14 +39,28 @@ sub _parse_meta {
     $meta_file = "--- #YAML:1.0\n" . $meta_file;
   }
 
+  # Some distributions have a "version_from" field which contains an
+  # invalid character (initial dot), and causes YAML 0.35 to complain
+  # (for instance, Test and File-Spec).  We fix this by quoting the
+  # string.
+
+  # TODO: rewrite this to use a proper META.yml parser module, or if
+  # one is not available, to remove the fields that we do not
+  # understand.
+
+  $meta_file =~
+    s/(version_from): (\.\/\w+)(([\.\/]\w+)+)\n/$1: \'$2$3\'\n/g; 
+
   my $meta;
-
+  eval {
+#    print STDERR $meta_file, "\n";
     ($meta) = Load( $meta_file );
-
+  };
   if ($meta) {
     return { (%{$meta->{requires}||{ }}, %{$meta->{build_requires}||{ }}) };
   }
   else {
+    carp "Error parsing META file: ", $!;
     return;
   }
 }
@@ -62,13 +77,18 @@ sub _parse_makefile {
   my $makefile = join("", <$fh>);
   close $fh;
 
-  unless ($makefile) {
+  unless ($makefile && (!ref($makefile))) {
     croak "No data was read: ", $file;
   }
 
   my $parse;
   eval {
-    $parse = new Module::MakefilePL::Parse( $makefile );
+
+    # For some strange reason, we sometimes get the following warning:
+    # "Warning: possible variable references" here, possibly connected
+    # to parsing "Class-Accessor-0.19" Makefile.PL.
+
+    $parse = Module::MakefilePL::Parse->new( $makefile );
   };
 
   unless ($parse) {
@@ -80,6 +100,10 @@ sub _parse_makefile {
 sub _search_directory {
   my $root_dir  = shift;
   my $recurse   = shift;
+
+  if ($DEBUG) {
+    print STDERR "_search_directory(\"$root_dir\", $recurse)\n";
+  }
 
   unless (-d $root_dir) {
     croak $root_dir, " is not a directory";
@@ -175,6 +199,16 @@ modules and the values are the version numbers.
 If multiple F<Makefile.PL> files are present, they are merged.
 
 =back
+
+=head2 Debugging
+
+There is a debugging hook in the module used for tracing problems:
+
+  $Module::ParseDeps::DEBUG = 1;
+
+This is only used for tracing recursive directory searches, but may
+include other features in the future.  Or the interface may be
+completely changed.
 
 =head1 SEE ALSO
 
